@@ -12,20 +12,18 @@
 // see <http://www.gnu.org/licenses/>.
 package net.opentsdb.tsd;
 
-import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicLong;
-
 import com.stumbleupon.async.Callback;
 import com.stumbleupon.async.Deferred;
-
-import org.jboss.netty.channel.Channel;
-
 import net.opentsdb.core.TSDB;
 import net.opentsdb.core.Tags;
 import net.opentsdb.stats.StatsCollector;
 import net.opentsdb.uid.NoSuchUniqueName;
+import org.jboss.netty.channel.Channel;
 
-/** Implements the "put" telnet-style command. */
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicLong;
+
+/** Implements the "inc" telnet-style command. */
 final class IncDataPointRpc implements TelnetRpc {
 
   private static final AtomicLong requests = new AtomicLong();
@@ -42,7 +40,7 @@ final class IncDataPointRpc implements TelnetRpc {
       final class PutErrback implements Callback<Exception, Exception> {
         public Exception call(final Exception arg) {
           if (chan.isConnected()) {
-            chan.write("put: HBase error: " + arg.getMessage() + '\n');
+            chan.write("inc: HBase error: " + arg.getMessage() + '\n');
           }
           hbase_errors.incrementAndGet();
           return arg;
@@ -53,13 +51,13 @@ final class IncDataPointRpc implements TelnetRpc {
       }
       return importDataPoint(tsdb, cmd).addErrback(new PutErrback());
     } catch (NumberFormatException x) {
-      errmsg = "put: invalid value: " + x.getMessage() + '\n';
+      errmsg = "inc: invalid value: " + x.getMessage() + '\n';
       invalid_values.incrementAndGet();
     } catch (IllegalArgumentException x) {
-      errmsg = "put: illegal argument: " + x.getMessage() + '\n';
+      errmsg = "inc: illegal argument: " + x.getMessage() + '\n';
       illegal_arguments.incrementAndGet();
     } catch (NoSuchUniqueName x) {
-      errmsg = "put: unknown metric: " + x.getMessage() + '\n';
+      errmsg = "inc: unknown metric: " + x.getMessage() + '\n';
       unknown_metrics.incrementAndGet();
     }
     if (errmsg != null && chan.isConnected()) {
@@ -73,7 +71,7 @@ final class IncDataPointRpc implements TelnetRpc {
    * @param collector The collector to use.
    */
   public static void collectStats(final StatsCollector collector) {
-    collector.record("rpc.received", requests, "type=put");
+    collector.record("rpc.received", requests, "type=inc");
     collector.record("rpc.errors", hbase_errors, "type=hbase_errors");
     collector.record("rpc.errors", invalid_values, "type=invalid_values");
     collector.record("rpc.errors", illegal_arguments, "type=illegal_arguments");
@@ -81,19 +79,19 @@ final class IncDataPointRpc implements TelnetRpc {
   }
 
   /**
-   * Imports a single data point.
-   * @param tsdb The TSDB to import the data point into.
+   * Increments a single data point.
+   * @param tsdb The TSDB to increment the data point into.
    * @param words The words describing the data point to import, in
    * the following format: {@code [metric, timestamp, value, ..tags..]}
-   * @return A deferred object that indicates the completion of the request.
+   * @return A deferred Long that indicates the completion of the request.
    * @throws NumberFormatException if the timestamp or value is invalid.
    * @throws IllegalArgumentException if any other argument is invalid.
    * @throws net.opentsdb.uid.NoSuchUniqueName if the metric isn't registered.
    */
   private Deferred<Object> importDataPoint(final TSDB tsdb, final String[] words) {
-    words[0] = null; // Ditch the "put".
+    words[0] = null; // Ditch the "inc".
     if (words.length < 5) {  // Need at least: metric timestamp value tag
-      //               ^ 5 and not 4 because words[0] is "put".
+      //               ^ 5 and not 4 because words[0] is "inc".
       throw new IllegalArgumentException("not enough arguments"
                                          + " (need least 4, got " + (words.length - 1) + ')');
     }
@@ -116,9 +114,9 @@ final class IncDataPointRpc implements TelnetRpc {
       }
     }
     if (value.indexOf('.') < 0) {  // integer value
-      return tsdb.addPoint(metric, timestamp, Tags.parseLong(value), tags);
+      return tsdb.incPoint(metric, timestamp, Tags.parseLong(value), tags);
     } else {  // floating point value
-      return tsdb.addPoint(metric, timestamp, Float.parseFloat(value), tags);
+      return tsdb.incPoint(metric, timestamp, Float.parseFloat(value), tags);
     }
   }
 }
