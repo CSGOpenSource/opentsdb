@@ -92,7 +92,7 @@ final class SpanGroup implements DataPoints {
    * ignored.
    * @param end_time Any data point strictly after this timestamp will be
    * ignored.
-   * @param spans A sequence of initial {@link Spans} to add to this group.
+   * @param spans A sequence of initial {@link Span} to add to this group.
    * Ignored if {@code null}.  Additional spans can be added with {@link #add}.
    * @param rate If {@code true}, the rate of the series will be used instead
    * of the actual values.
@@ -143,7 +143,6 @@ final class SpanGroup implements DataPoints {
 
   /**
    * Computes the intersection set + symmetric difference of tags in all spans.
-   * @param spans A collection of spans for which to find the common tags.
    * @return A (possibly empty) map of the tags common to all the spans given.
    */
   private void computeTags() {

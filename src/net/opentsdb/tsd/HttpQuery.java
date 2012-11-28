@@ -12,6 +12,24 @@
 // see <http://www.gnu.org/licenses/>.
 package net.opentsdb.tsd;
 
+import ch.qos.logback.classic.spi.ThrowableProxy;
+import ch.qos.logback.classic.spi.ThrowableProxyUtil;
+import com.stumbleupon.async.Deferred;
+import net.opentsdb.core.Const;
+import net.opentsdb.graph.Plot;
+import net.opentsdb.stats.Histogram;
+import net.opentsdb.stats.StatsCollector;
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelFuture;
+import org.jboss.netty.channel.ChannelFutureListener;
+import org.jboss.netty.channel.DefaultFileRegion;
+import org.jboss.netty.handler.codec.http.*;
+import org.jboss.netty.util.CharsetUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,33 +37,6 @@ import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.stumbleupon.async.Deferred;
-
-import ch.qos.logback.classic.spi.ThrowableProxy;
-import ch.qos.logback.classic.spi.ThrowableProxyUtil;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelFutureListener;
-import org.jboss.netty.channel.DefaultFileRegion;
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.HttpVersion;
-import org.jboss.netty.handler.codec.http.QueryStringDecoder;
-import org.jboss.netty.util.CharsetUtil;
-
-import net.opentsdb.core.Const;
-import net.opentsdb.graph.Plot;
-import net.opentsdb.stats.Histogram;
-import net.opentsdb.stats.StatsCollector;
 
 /**
  * Binds together an HTTP request and the channel on which it was received.
@@ -380,11 +371,6 @@ final class HttpQuery {
 
   /**
    * Sends an HTTP reply to the client.
-   * <p>
-   * This is equivalent of
-   * <code>{@link sendReply(HttpResponseStatus, StringBuilder)
-   * sendReply}({@link HttpResponseStatus#OK
-   * HttpResponseStatus.OK}, buf)</code>
    * @param buf The content of the reply to send.
    */
   public void sendReply(final StringBuilder buf) {
@@ -393,11 +379,6 @@ final class HttpQuery {
 
   /**
    * Sends an HTTP reply to the client.
-   * <p>
-   * This is equivalent of
-   * <code>{@link sendReply(HttpResponseStatus, StringBuilder)
-   * sendReply}({@link HttpResponseStatus#OK
-   * HttpResponseStatus.OK}, buf)</code>
    * @param buf The content of the reply to send.
    */
   public void sendReply(final String buf) {

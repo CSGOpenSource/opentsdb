@@ -12,18 +12,12 @@
 // see <http://www.gnu.org/licenses/>.
 package net.opentsdb.core;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-
+import org.hbase.async.Bytes;
+import org.hbase.async.KeyValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.hbase.async.Bytes;
-import org.hbase.async.KeyValue;
+import java.util.*;
 
 /**
  * Represents a read-only sequence of continuous data points.
@@ -341,7 +335,6 @@ final class Span implements DataPoints {
      * Ctor.
      * @param interval The interval in seconds wanted between each data point.
      * @param downsampler The downsampling function to use.
-     * @param iterator The iterator to access the underlying data.
      */
     DownsamplingIterator(final int interval,
                          final Aggregator downsampler) {

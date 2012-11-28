@@ -12,19 +12,13 @@
 // see <http://www.gnu.org/licenses/>.
 package net.opentsdb.core;
 
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
+import net.opentsdb.uid.NoSuchUniqueId;
+import net.opentsdb.uid.NoSuchUniqueName;
+import org.hbase.async.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.hbase.async.Bytes;
-
-import net.opentsdb.uid.NoSuchUniqueId;
-import net.opentsdb.uid.NoSuchUniqueName;
+import java.util.*;
 
 /** Helper functions to deal with tags. */
 public final class Tags {
@@ -206,7 +200,6 @@ public final class Tags {
    * Extracts the value ID of the given tag UD name from the given row key.
    * @param tsdb The TSDB instance to use for UniqueId lookups.
    * @param row The row key in which to search the tag name.
-   * @param name The name of the tag to search in the row key.
    * @return The value ID associated with the given tag ID, or null if this
    * tag ID isn't present in this row key.
    */

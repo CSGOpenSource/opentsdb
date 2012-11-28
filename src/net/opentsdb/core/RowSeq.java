@@ -12,18 +12,12 @@
 // see <http://www.gnu.org/licenses/>.
 package net.opentsdb.core;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-
+import org.hbase.async.Bytes;
+import org.hbase.async.KeyValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.hbase.async.Bytes;
-import org.hbase.async.KeyValue;
+import java.util.*;
 
 /**
  * Represents a read-only sequence of continuous HBase rows.
@@ -185,7 +179,7 @@ final class RowSeq implements DataPoints {
 
   /**
    * Extracts the value of a cell containing a data point.
-   * @param value The contents of a cell in HBase.
+   * @param values The contents of a cell in HBase.
    * @param value_idx The offset inside {@code values} at which the value
    * starts.
    * @param flags The flags for this value.
@@ -207,7 +201,7 @@ final class RowSeq implements DataPoints {
 
   /**
    * Extracts the value of a cell containing a data point.
-   * @param value The contents of a cell in HBase.
+   * @param values The contents of a cell in HBase.
    * @param value_idx The offset inside {@code values} at which the value
    * starts.
    * @param flags The flags for this value.
