@@ -131,7 +131,7 @@ final class RpcHandler extends SimpleChannelUpstreamHandler {
    * @param command The split telnet-style command.
    */
   private void handleTelnetRpc(final Channel chan, final String[] command) {
-in    TelnetRpc rpc = telnet_commands.get(command[0]);
+    TelnetRpc rpc = telnet_commands.get(command[0]);
     if (rpc == null) {
       rpc = unknown_cmd;
     }
