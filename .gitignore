@@ -8,6 +8,5 @@ target
 config.log
 config.status
 configure
-pom.xml
 .idea
 *.iml
