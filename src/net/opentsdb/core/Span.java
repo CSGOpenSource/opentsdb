@@ -487,7 +487,7 @@ final class Span implements DataPoints {
       return current_row.peekNextTimestamp() < time;
     }
 
-    public long nextLongValue() {
+    public long nextLongValue(boolean allow_interp) {
       if (hasNextValue()) {
         moveToNext();
         return current_row.longValue();
@@ -499,7 +499,7 @@ final class Span implements DataPoints {
     // Aggregator.Doubles interface //
     // ---------------------------- //
 
-    public double nextDoubleValue() {
+    public double nextDoubleValue(boolean allow_interp) {
       if (hasNextValue()) {
         moveToNext();
         // Use `toDouble' instead of `doubleValue' because we can get here if

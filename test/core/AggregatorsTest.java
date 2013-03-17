@@ -48,11 +48,11 @@ public final class AggregatorsTest {
       return i + 1 < numbers.length;
     }
 
-    public long nextLongValue() {
+    public long nextLongValue(boolean allow_interp) {
       return numbers[i++];
     }
 
-    public double nextDoubleValue() {
+    public double nextDoubleValue(boolean allow_interp) {
       return numbers[i++];
     }
 

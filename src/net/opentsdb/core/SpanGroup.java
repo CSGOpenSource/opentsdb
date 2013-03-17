@@ -699,7 +699,7 @@ final class SpanGroup implements DataPoints {
       return false;
     }
 
-    public long nextLongValue() {
+    public long nextLongValue(boolean allow_interp) {
       if (hasNextValue(true)) {
         final long y0 = values[pos];
         if (rate) {
@@ -718,6 +718,11 @@ final class SpanGroup implements DataPoints {
         if (x == x1) {
           return y1;
         }
+
+        if(!allow_interp) {
+            return 0;
+        }
+
         final long r = y0 + (x - x0) * (y1 - y0) / (x1 - x0);
         //LOG.debug("Lerping to time " + x + ": " + y0 + " @ " + x0
         //          + " -> " + y1 + " @ " + x1 + " => " + r);
@@ -733,7 +738,7 @@ final class SpanGroup implements DataPoints {
     // Aggregator.Doubles interface //
     // ---------------------------- //
 
-    public double nextDoubleValue() {
+    public double nextDoubleValue(boolean allow_interp) {
       if (hasNextValue(true)) {
         final double y0 = ((timestamps[pos] & FLAG_FLOAT) == FLAG_FLOAT
                            ? Double.longBitsToDouble(values[pos])
@@ -748,6 +753,11 @@ final class SpanGroup implements DataPoints {
           assert x0 > x1: ("Next timestamp (" + x0 + ") is supposed to be "
             + " strictly greater than the previous one (" + x1 + "), but it's"
             + " not.  this=" + this);
+
+          if(!allow_interp) {
+            return 0;
+          }
+
           final double r = (y0 - y1) / (x0 - x1);
           //LOG.debug("Rate for " + y1 + " @ " + x1
           //          + " -> " + y0 + " @ " + x0 + " => " + r);
@@ -772,6 +782,11 @@ final class SpanGroup implements DataPoints {
           //LOG.debug("No lerp needed x == x1 (" + x + " == "+x1+") => " + y1);
           return y1;
         }
+
+        if(!allow_interp) {
+          return 0;
+        }
+
         final double r = y0 + (x - x0) * (y1 - y0) / (x1 - x0);
         //LOG.debug("Lerping to time " + x + ": " + y0 + " @ " + x0
         //          + " -> " + y1 + " @ " + x1 + " => " + r);

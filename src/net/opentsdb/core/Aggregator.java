@@ -42,7 +42,7 @@ public interface Aggregator {
      * @throws NoSuchElementException if calling {@link #hasNextValue} returns
      * {@code false}.
      */
-    long nextLongValue();
+    long nextLongValue(boolean allow_interp);
 
   }
 
@@ -65,7 +65,7 @@ public interface Aggregator {
      * @throws NoSuchElementException if calling {@link #hasNextValue} returns
      * {@code false}.
      */
-    double nextDoubleValue();
+    double nextDoubleValue(boolean allow_interp);
 
   }
 

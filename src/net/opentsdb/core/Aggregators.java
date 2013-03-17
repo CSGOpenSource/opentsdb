@@ -76,17 +76,17 @@ public final class Aggregators {
   private static final class Sum implements Aggregator {
 
     public long runLong(final Longs values) {
-      long result = values.nextLongValue();
+      long result = values.nextLongValue(false);
       while (values.hasNextValue()) {
-        result += values.nextLongValue();
+        result += values.nextLongValue(false);
       }
       return result;
     }
 
     public double runDouble(final Doubles values) {
-      double result = values.nextDoubleValue();
+      double result = values.nextDoubleValue(false);
       while (values.hasNextValue()) {
-        result += values.nextDoubleValue();
+        result += values.nextDoubleValue(false);
       }
       return result;
     }
@@ -100,9 +100,9 @@ public final class Aggregators {
   private static final class Min implements Aggregator {
 
     public long runLong(final Longs values) {
-      long min = values.nextLongValue();
+      long min = values.nextLongValue(true);
       while (values.hasNextValue()) {
-        final long val = values.nextLongValue();
+        final long val = values.nextLongValue(true);
         if (val < min) {
           min = val;
         }
@@ -111,9 +111,9 @@ public final class Aggregators {
     }
 
     public double runDouble(final Doubles values) {
-      double min = values.nextDoubleValue();
+      double min = values.nextDoubleValue(true);
       while (values.hasNextValue()) {
-        final double val = values.nextDoubleValue();
+        final double val = values.nextDoubleValue(true);
         if (val < min) {
           min = val;
         }
@@ -130,9 +130,9 @@ public final class Aggregators {
   private static final class Max implements Aggregator {
 
     public long runLong(final Longs values) {
-      long max = values.nextLongValue();
+      long max = values.nextLongValue(false);
       while (values.hasNextValue()) {
-        final long val = values.nextLongValue();
+        final long val = values.nextLongValue(false);
         if (val > max) {
           max = val;
         }
@@ -141,9 +141,9 @@ public final class Aggregators {
     }
 
     public double runDouble(final Doubles values) {
-      double max = values.nextDoubleValue();
+      double max = values.nextDoubleValue(false);
       while (values.hasNextValue()) {
-        final double val = values.nextDoubleValue();
+        final double val = values.nextDoubleValue(false);
         if (val > max) {
           max = val;
         }
@@ -160,20 +160,20 @@ public final class Aggregators {
   private static final class Avg implements Aggregator {
 
     public long runLong(final Longs values) {
-      long result = values.nextLongValue();
+      long result = values.nextLongValue(true);
       int n = 1;
       while (values.hasNextValue()) {
-        result += values.nextLongValue();
+        result += values.nextLongValue(true);
         n++;
       }
       return result / n;
     }
 
     public double runDouble(final Doubles values) {
-      double result = values.nextDoubleValue();
+      double result = values.nextDoubleValue(true);
       int n = 1;
       while (values.hasNextValue()) {
-        result += values.nextDoubleValue();
+        result += values.nextDoubleValue(true);
         n++;
       }
       return result / n;
@@ -196,7 +196,7 @@ public final class Aggregators {
   private static final class StdDev implements Aggregator {
 
     public long runLong(final Longs values) {
-      double old_mean = values.nextLongValue();
+      double old_mean = values.nextLongValue(true);
 
       if (!values.hasNextValue()) {
         return 0;
@@ -206,7 +206,7 @@ public final class Aggregators {
       double new_mean = 0;
       double variance = 0;
       do {
-        final double x = values.nextLongValue();
+        final double x = values.nextLongValue(true);
         new_mean = old_mean + (x - old_mean) / n;
         variance += (x - old_mean) * (x - new_mean);
         old_mean = new_mean;
@@ -217,7 +217,7 @@ public final class Aggregators {
     }
 
     public double runDouble(final Doubles values) {
-      double old_mean = values.nextDoubleValue();
+      double old_mean = values.nextDoubleValue(true);
 
       if (!values.hasNextValue()) {
         return 0;
@@ -227,7 +227,7 @@ public final class Aggregators {
       double new_mean = 0;
       double variance = 0;
       do {
-        final double x = values.nextDoubleValue();
+        final double x = values.nextDoubleValue(true);
         new_mean = old_mean + (x - old_mean) / n;
         variance += (x - old_mean) * (x - new_mean);
         old_mean = new_mean;
