@@ -6,6 +6,14 @@
     <property name="lib" location="third_party"/>
     <property name="test.dir" location="build/test"/>
     <property name="build-aux" location="build-aux"/>
+
+    <target name="tar" unless="isWindows" depends="dist">
+      <exec executable="tar" dir="${dist}" output="/dev/null" >
+        <arg value="-cvz"/>
+        <arg value="--file=opentsdb-1.1.0.tgz"/>
+        <arg value="."/>
+      </exec>
+    </target>
 	
     <target name="init" description="performing bootstrap">
         <condition property="isWindows">
@@ -17,12 +25,20 @@
         <mkdir dir="${build}/gwt" />
         <mkdir dir="${build}/logs" />
 
-        <copy file="manifest.in" toFile="${build}/manifest" />
-        <copy file="tsdb.in" toFile="${build}/tsdb" />
-        <copy file="${src}/mygnuplot.sh" toDir="${build}" /> 
-        <copy file="${src}/logback.xml" toDir="${build}" /> 
-        <copy file="${src}/start-tsdb.sh" toDir="${build}" /> 
-        <copy file="${src}/tsdb.local" toDir="${build}" /> 
+        <copy file="${build-aux}/manifest" toDir="${build}" />
+        <copy file="${build-aux}/tsdb" toDir="${build}" />
+        <copy file="${build-aux}/mygnuplot.sh" toDir="${build}" /> 
+        <copy file="${build-aux}/logback.xml" toDir="${build}" /> 
+        <copy file="${build-aux}/start-tsdb.sh" toDir="${build}" /> 
+        <copy file="${build-aux}/tsdb.local.template" toDir="${build}" /> 
+        <copy file="${build-aux}/create_table.sh" toDir="${build}" /> 
+
+        <chmod perm="755" type="file">
+          <fileset dir="${build}">
+            <include name="*.sh" />
+            <include name="tsdb" />
+          </fileset>
+        </chmod>
 
         <copy toDir="${build}" flatten="true" >
             <fileset dir="${lib}">
@@ -169,19 +185,21 @@
                 <include name="*.jar"/>
             </fileset>
        </copy>
+    
+       <copy toDir="${dist}/opentsdb" file="${build-aux}/tsdb" />
+       <copy toDir="${dist}/opentsdb" file="${build-aux}/mygnuplot.sh" /> 
+       <copy toDir="${dist}/opentsdb" file="${build-aux}/logback.xml"  /> 
+       <copy toDir="${dist}/opentsdb" file="${build-aux}/start-tsdb.sh" /> 
+       <copy toDir="${dist}/opentsdb" file="${build-aux}/tsdb.local.template" /> 
+       <copy toDir="${dist}/opentsdb" file="${build-aux}/create_table.sh"  /> 
 
-       <copy toDir="${dist}/opentsdb" file="${build}/tsdb" />
-       <copy toDir="${dist}/opentsdb" file="${build}/mygnuplot.sh" />
-       <copy toDir="${dist}/opentsdb" file="${build}/start-tsdb.sh" />
-       <copy toDir="${dist}/opentsdb" file="${build}/tsdb.local" />
-       <copy toDir="${dist}/opentsdb" file="${build}/logback.xml" />
+       <chmod perm="755" type="file">
+          <fileset dir="${dist}/opentsdb">
+            <include name="*.sh" />
+            <include name="tsdb" />
+          </fileset>
+       </chmod>
 
-       <chmod file="${dist}/opentsdb/tsdb" perm="755" /> 
-       <chmod file="${dist}/opentsdb/start-tsdb.sh" perm="755" /> 
-
-       <tar destfile="${dist}/opentsdb-1.1.0.tgz" basedir="${dist}" compression="gzip" />
-
-       <delete dir="${dist}/opentsdb"/>
     </target>
 
     <macrodef name="executetest" >

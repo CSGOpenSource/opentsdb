@@ -3,7 +3,8 @@
 set -e
 me=`basename "$0"`
 mydir=`dirname "$0"`
-pkgdatadir=''
+#force pkgdatadir
+pkgdatadir=$mydir
 
 test -d "$pkgdatadir" || {
   echo >&2 "$me: Uh-oh, \`$pkgdatadir' doesn't exist, is OpenTSDB properly installed?"

@@ -1,6 +1,0 @@
-#!/bin/bash
-#
-#MY_ARGS='--zkquorum='
-MY_ARGS=''
-set x $MY_ARGS "$@"
-shift
