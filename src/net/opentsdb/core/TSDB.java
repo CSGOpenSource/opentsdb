@@ -47,7 +47,8 @@ public final class TSDB {
   static final boolean enable_compactions;
   static {
     final String compactions = System.getProperty("tsd.feature.compactions");
-    enable_compactions = compactions != null && !"false".equals(compactions);
+    // If not set, or set to anything but "false", defaults to true.
+    enable_compactions = !"false".equals(compactions);
   }
 
   /** Client for the HBase cluster to use.  */
@@ -287,7 +288,8 @@ public final class TSDB {
     scheduleForCompaction(row, (int) base_time);
     final short qualifier = (short) ((timestamp - base_time) << Const.FLAG_BITS
                                      | flags);
-    final PutRequest point = new PutRequest(table, row, FAMILY, Bytes.fromShort(qualifier), value);
+    final PutRequest point = new PutRequest(table, row, FAMILY,
+                                            Bytes.fromShort(qualifier), value);
     // TODO(tsuna): Add a callback to time the latency of HBase and store the
     // timing in a moving Histogram (once we have a class for this).
     return client.put(point);
@@ -374,7 +376,6 @@ public final class TSDB {
         final byte[] row = IncomingDataPoints.rowKeyTemplate(this, metric, tags);
         final long base_time = (timestamp - (timestamp % Const.MAX_TIMESPAN));
         Bytes.setInt(row, (int) base_time, metrics.width());
-        scheduleForCompaction(row, (int) base_time);
         final short qualifier = (short) ((timestamp - base_time) << Const.FLAG_BITS
                 | flags);
         final AtomicIncrementRequest point = new AtomicIncrementRequest(table, row, FAMILY, Bytes.fromShort(qualifier), value);
