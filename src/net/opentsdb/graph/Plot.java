@@ -12,11 +12,14 @@
 // see <http://www.gnu.org/licenses/>.
 package net.opentsdb.graph;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -180,12 +183,17 @@ public final class Plot {
    * @throws IOException if there was an error while writing one of the files.
    */
   public int dumpToFiles(final String basepath) throws IOException {
+    int MAX_SERIES = 5;
     int npoints = 0;
+    TreeMap<Double, Integer> weightMap = new TreeMap<>(Collections.reverseOrder());
+    int[] topseries = new int[MAX_SERIES];
+    int ntopseries = 0;
     final int nseries = datapoints.size();
-    final String datafiles[] = nseries > 0 ? new String[nseries] : null;
+    final String datafiles[] = nseries > 0 ? new String[MAX_SERIES+1] : null;
     for (int i = 0; i < nseries; i++) {
-      datafiles[i] = basepath + "_" + i + ".dat";
-      final PrintWriter datafile = new PrintWriter(datafiles[i]);
+      String datafileName = basepath + "_" + i + "a.dat";
+      final PrintWriter datafile = new PrintWriter(datafileName);
+      double weight = 0.0;
       try {
         for (final DataPoint d : datapoints.get(i)) {
           final long ts = d.timestamp();
@@ -195,19 +203,26 @@ public final class Plot {
           datafile.print(ts + utc_offset);
           datafile.print(' ');
           if (d.isInteger()) {
-            datafile.print(d.longValue());
+            long value = d.longValue();
+            weight += (value / 1000000.0);
+            datafile.print(value);
           } else {
             final double value = d.doubleValue();
             if (value != value || Double.isInfinite(value)) {
               throw new IllegalStateException("NaN or Infinity found in"
                   + " datapoints #" + i + ": " + value + " d=" + d);
             }
+            weight += (value / 1000000.0);
             datafile.print(value);
           }
           datafile.print('\n');
         }
       } finally {
         datafile.close();
+        while(weightMap.containsKey(weight))
+            weight -= 0.00000001;
+
+        weightMap.put(weight, i);
       }
     }
 
@@ -217,8 +232,27 @@ public final class Plot {
       // data.  We always set the xrange, but the yrange is supplied by the
       // user.  Let's make sure it defines a min and a max.
       params.put("yrange", "[0:10]");  // Doesn't matter what values we use.
+      ntopseries = 0;
     }
-    writeGnuplotScript(basepath, datafiles);
+    else {
+        ntopseries = 0;
+        for (Map.Entry<Double, Integer> entry : weightMap.entrySet()) {
+            datafiles[ntopseries] = basepath + "_" + ntopseries + ".dat";
+            topseries[ntopseries] = entry.getValue();
+
+            new File(basepath + "_" + topseries[ntopseries]  + "a.dat")
+                    .renameTo(new File(datafiles[ntopseries]));
+
+            if(++ntopseries >= MAX_SERIES)
+                break;
+        }
+
+        for(int index = ntopseries; index < nseries; index++) {
+            File oldFile = new File(basepath + "_" + index + "a.dat");
+            oldFile.delete();
+        }
+    }
+    writeGnuplotScript(basepath, datafiles, topseries, ntopseries);
     return npoints;
   }
 
@@ -231,7 +265,9 @@ public final class Plot {
    * Can be {@code null} if there's no data to plot.
    */
   private void writeGnuplotScript(final String basepath,
-                                  final String[] datafiles) throws IOException {
+                                  final String[] datafiles,
+                                  int[] topseries,
+                                  int ntopseries) throws IOException {
     final String script_path = basepath + ".gnuplot";
     final PrintWriter gp = new PrintWriter(script_path);
     try {
@@ -273,8 +309,7 @@ public final class Plot {
       if (!params.containsKey("format x")) {
         gp.append("set format x \"").append(xFormat()).append("\"\n");
       }
-      final int nseries = datapoints.size();
-      if (nseries > 0) {
+      if (ntopseries > 0) {
         gp.write("set grid\n"
                  + "set style data linespoints\n");
         if (!params.containsKey("key")) {
@@ -308,8 +343,8 @@ public final class Plot {
       }
 
       gp.write("plot ");
-      for (int i = 0; i < nseries; i++) {
-        final DataPoints dp = datapoints.get(i);
+      for (int i = 0; i < ntopseries; i++) {
+        final DataPoints dp = datapoints.get(topseries[i]);
         final String title = dp.metricName() + dp.getTags();
         gp.append(" \"").append(datafiles[i]).append("\" using 1:2");
         if (smooth != null) {
@@ -321,12 +356,12 @@ public final class Plot {
         if (!opts.isEmpty()) {
           gp.append(' ').write(opts);
         }
-        if (i != nseries - 1) {
+        if (i != ntopseries - 1) {
           gp.print(", \\");
         }
         gp.write('\n');
       }
-      if (nseries == 0) {
+      if (ntopseries == 0) {
         gp.write('0');
       }
     } finally {
