@@ -152,6 +152,23 @@ final class HttpQuery {
     return params == null ? null : params.get(params.size() - 1);
   }
 
+  public int getQueryStringInt(final String paramname, int defaultValue) {
+      String strval = getQueryStringParam(paramname);
+      int value = defaultValue;
+
+      if(strval != null)    {
+          try
+          {
+              value = Integer.parseInt(strval);
+          }
+          catch(NumberFormatException nfe)
+          {
+          }
+      }
+
+      return value;
+  }
+
   /**
    * Returns the non-empty value of the given required query string parameter.
    * <p>
@@ -447,7 +464,7 @@ final class HttpQuery {
       final String basepath =
         RpcHandler.getDirectoryFromSystemProp("tsd.http.cachedir")
         + Integer.toHexString(msg.hashCode());
-      GraphHandler.runGnuplot(this, basepath, plot);
+      GraphHandler.runGnuplot(this, basepath, plot, -1);
       plot = null;
       sendFile(status, basepath + ".png", max_age);
     } catch (Exception e) {

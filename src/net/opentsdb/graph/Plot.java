@@ -182,14 +182,14 @@ public final class Plot {
    * aggregation or downsampling.
    * @throws IOException if there was an error while writing one of the files.
    */
-  public int dumpToFiles(final String basepath) throws IOException {
-    int MAX_SERIES = 5;
+  public int dumpToFiles(final String basepath, final int topN) throws IOException {
+    final int nseries = datapoints.size();
+    int maxSeries = topN > 0 ? topN : nseries;
     int npoints = 0;
     TreeMap<Double, Integer> weightMap = new TreeMap<>(Collections.reverseOrder());
-    int[] topseries = new int[MAX_SERIES];
+    int[] topseries = new int[maxSeries];
     int ntopseries = 0;
-    final int nseries = datapoints.size();
-    final String datafiles[] = nseries > 0 ? new String[MAX_SERIES+1] : null;
+    final String datafiles[] = nseries > 0 ? new String[maxSeries+1] : null;
     for (int i = 0; i < nseries; i++) {
       String datafileName = basepath + "_" + i + "a.dat";
       final PrintWriter datafile = new PrintWriter(datafileName);
@@ -243,7 +243,8 @@ public final class Plot {
             new File(basepath + "_" + topseries[ntopseries]  + "a.dat")
                     .renameTo(new File(datafiles[ntopseries]));
 
-            if(++ntopseries >= MAX_SERIES)
+            ++ntopseries;
+            if(ntopseries >= maxSeries)
                 break;
         }
 

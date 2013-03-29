@@ -113,6 +113,7 @@ final class GraphHandler implements HttpRpc {
     final long start_time = getQueryStringDate(query, "start");
     final boolean nocache = query.hasQueryStringParam("nocache");
     final boolean ascii = query.hasQueryStringParam("ascii");
+
     if (start_time == -1) {
       throw BadRequestException.missingParameter("start");
     }
@@ -138,6 +139,9 @@ final class GraphHandler implements HttpRpc {
       throw new BadRequestException(options.size() + " `o' parameters, but "
         + tsdbqueries.length + " `m' parameters.");
     }
+
+    int topN = query.getQueryStringInt("topN", -1);
+
     for (final Query tsdbquery : tsdbqueries) {
       // disable padding for ascii value return
       if(!ascii)
@@ -189,7 +193,7 @@ final class GraphHandler implements HttpRpc {
 
     try {
       gnuplot.execute(new RunGnuplot(query, max_age, plot, basepath,
-                                     aggregated_tags, npoints));
+                                     aggregated_tags, npoints, topN));
     } catch (RejectedExecutionException e) {
       query.internalError(new Exception("Too many requests pending,"
                                         + " please try again later", e));
@@ -239,19 +243,22 @@ final class GraphHandler implements HttpRpc {
     private final String basepath;
     private final HashSet<String>[] aggregated_tags;
     private final int npoints;
+    private final int topN;
 
     public RunGnuplot(final HttpQuery query,
                       final int max_age,
                       final Plot plot,
                       final String basepath,
                       final HashSet<String>[] aggregated_tags,
-                      final int npoints) {
+                      final int npoints,
+                      final int topN) {
       this.query = query;
       this.max_age = max_age;
       this.plot = plot;
       this.basepath = basepath;
       this.aggregated_tags = aggregated_tags;
       this.npoints = npoints;
+      this.topN = topN;
     }
 
     public void run() {
@@ -269,7 +276,7 @@ final class GraphHandler implements HttpRpc {
     }
 
     private void execute() throws IOException {
-      final int nplotted = runGnuplot(query, basepath, plot);
+      final int nplotted = runGnuplot(query, basepath, plot, topN);
       if (query.hasQueryStringParam("json")) {
         final StringBuilder buf = new StringBuilder(64);
         buf.append("{\"plotted\":").append(nplotted)
@@ -698,8 +705,9 @@ final class GraphHandler implements HttpRpc {
    */
   static int runGnuplot(final HttpQuery query,
                         final String basepath,
-                        final Plot plot) throws IOException {
-    final int nplotted = plot.dumpToFiles(basepath);
+                        final Plot plot,
+                        final int topN) throws IOException {
+    final int nplotted = plot.dumpToFiles(basepath, topN);
     final long start_time = System.nanoTime();
     final Process gnuplot = new ProcessBuilder(GNUPLOT,
       basepath + ".out", basepath + ".err", basepath + ".gnuplot").start();

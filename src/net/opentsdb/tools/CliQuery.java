@@ -122,7 +122,7 @@ final class CliQuery {
 
     if (plot != null) {
       try {
-        final int npoints = plot.dumpToFiles(basepath);
+        final int npoints = plot.dumpToFiles(basepath, -1);
         LOG.info("Wrote " + npoints + " for Gnuplot");
       } catch (IOException e) {
         LOG.error("Failed to write the Gnuplot file under " + basepath, e);
