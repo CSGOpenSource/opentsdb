@@ -173,6 +173,13 @@ public final class Plot {
     return datapoints;
   }
 
+  /*
+   * Returns the number of datapoints in the plot (series size)
+   */
+  public int getDataPointsSize() {
+      return datapoints.size();
+  }
+
   /**
    * Generates the Gnuplot script and data files.
    * @param basepath The base path to use.  A number of new files will be
