@@ -143,10 +143,6 @@ final class GraphHandler implements HttpRpc {
     int topN = query.getQueryStringInt("topN", -1);
 
     for (final Query tsdbquery : tsdbqueries) {
-      // disable padding for ascii value return
-      if(!ascii)
-        tsdbquery.setPadding(true);
-
       try {
         tsdbquery.setStartTime(start_time);
       } catch (IllegalArgumentException e) {
@@ -187,7 +183,7 @@ final class GraphHandler implements HttpRpc {
     tsdbqueries = null;  // free()
 
     if (ascii) {
-      respondAsciiQuery(query, max_age, basepath, plot);
+      respondAsciiQuery(query, max_age, basepath, plot, start_time, end_time);
       return;
     }
 
@@ -761,11 +757,15 @@ final class GraphHandler implements HttpRpc {
    * cache the result in case of a cache hit.
    * @param basepath The base path used for the Gnuplot files.
    * @param plot The plot object to generate Gnuplot's input files.
+   * @param start_time The user provided query start time
+   * @param end_time The user provided query end time
    */
   private static void respondAsciiQuery(final HttpQuery query,
                                         final int max_age,
                                         final String basepath,
-                                        final Plot plot) {
+                                        final Plot plot,
+                                        long start_time,
+                                        long end_time) {
     final String path = basepath + ".txt";
     PrintWriter asciifile;
     try {
@@ -784,9 +784,14 @@ final class GraphHandler implements HttpRpc {
             .append('=').append(tag.getValue());
         }
         for (final DataPoint d : dp) {
+          long timestamp = d.timestamp();
+
+          if(timestamp < start_time || timestamp > end_time)
+              continue;
+
           asciifile.print(metric);
           asciifile.print(' ');
-          asciifile.print(d.timestamp());
+          asciifile.print(timestamp);
           asciifile.print(' ');
           if (d.isInteger()) {
             asciifile.print(d.longValue());
@@ -849,10 +854,6 @@ final class GraphHandler implements HttpRpc {
       }
       final Query tsdbquery = tsdb.newQuery();
       try {
-        // disable padding for ascii value return
-        if(!ascii)
-            tsdbquery.setPadding(true);
-
         tsdbquery.setTimeSeries(metric, parsedtags, agg, rate);
       } catch (NoSuchUniqueName e) {
         throw new BadRequestException(e.getMessage());

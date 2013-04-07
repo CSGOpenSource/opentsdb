@@ -4,13 +4,13 @@ package net.opentsdb;
 /** Build data for {@code net.opentsdb} */
 public final class BuildData {
   /** Short revision at which this package was built. */
-  public static final String short_revision = "4e35576";
+  public static final String short_revision = "4168e3d";
   /** Full revision at which this package was built. */
-  public static final String full_revision = "4e355765b9ecf91ba48ea8f632a9dce24a1f8725";
+  public static final String full_revision = "4168e3d21634c0e2803f8fddb8f3b418e0545afb";
   /** UTC date at which this package was built. */
-  public static final String date = "2013/03/27 00:44:03 +0000";
+  public static final String date = "2013/04/06 21:07:38 +0000";
   /** UNIX timestamp of the time of the build. */
-  public static final long timestamp = 1364345043;
+  public static final long timestamp = 1365282458;
 
   /** Represents the status of the repository at the time of the build. */
   public static enum RepoStatus {
@@ -27,17 +27,17 @@ public final class BuildData {
   /** Username of the user who built this package. */
   public static final String user = "kevin";
   /** Host on which this package was built. */
-  public static final String host = "thaj01-w7.csg.csgsystems.com";
+  public static final String host = "Kevins-MacBook-Pro.local";
   /** Path to the repository in which this package was built. */
   public static final String repo = "/Data/git/opentsdb/src/net/opentsdb";
 
   /** Human readable string describing the revision of this package. */
   public static final String revisionString() {
-    return "net.opentsdb built at revision 4e35576 (MINT)";
+    return "net.opentsdb built at revision 4168e3d (MINT)";
   }
   /** Human readable string describing the build information of this package. */
   public static final String buildString() {
-    return "Built on 2013/03/27 00:44:03 +0000 by kevin@thaj01-w7.csg.csgsystems.com:/Data/git/opentsdb/src/net/opentsdb";
+    return "Built on 2013/04/06 21:07:38 +0000 by kevin@Kevins-MacBook-Pro.local:/Data/git/opentsdb/src/net/opentsdb";
   }
 
   // These functions are useful to avoid cross-jar inlining.

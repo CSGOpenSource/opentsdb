@@ -103,10 +103,4 @@ public interface Query {
    */
   DataPoints[] run() throws HBaseException;
 
-  /**
-   * Determine if padding should be applied.  This is disabled (false) by default and should be set
-   * to true for graphing functions which may require additional data to plot correctly.
-   */
-  void setPadding(boolean padding);
-
 }

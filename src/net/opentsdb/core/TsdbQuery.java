@@ -104,9 +104,6 @@ final class TsdbQuery implements Query {
   /** Minimum time interval (in seconds) wanted between each data point. */
   private int sample_interval;
 
-  /** Set to true to pull extra data before start_time and after end_time */
-  private boolean padding = false;
-
   /** Constructor. */
   public TsdbQuery(final TSDB tsdb) {
     this.tsdb = tsdb;
@@ -146,10 +143,6 @@ final class TsdbQuery implements Query {
       setEndTime(System.currentTimeMillis() / 1000);
     }
     return end_time;
-  }
-
-  public void setPadding(final boolean padding) {
-    this.padding = padding;
   }
 
   public void setTimeSeries(final String metric,
@@ -299,8 +292,8 @@ final class TsdbQuery implements Query {
       // We haven't been asked to find groups, so let's put all the spans
       // together in the same group.
       final SpanGroup group = new SpanGroup(tsdb,
-                                            (padding ? getScanStartTime() : start_time),
-                                            (padding ? getScanEndTime() : end_time),
+                                            getScanStartTime(),
+                                            getScanEndTime(),
                                             spans.values(),
                                             rate,
                                             aggregator,
@@ -346,8 +339,8 @@ final class TsdbQuery implements Query {
       SpanGroup thegroup = groups.get(group);
       if (thegroup == null) {
         thegroup = new SpanGroup(tsdb,
-                                 (padding ? getScanStartTime() : start_time),
-                                 (padding ? getScanEndTime() : end_time),
+                                 getScanStartTime(),
+                                 getScanEndTime(),
                                  null, rate, aggregator,
                                  sample_interval, downsampler);
         // Copy the array because we're going to keep `group' and overwrite
@@ -588,7 +581,6 @@ final class TsdbQuery implements Query {
       }
     }
     buf.append(")");
-    buf.append(" padding=").append(this.padding);
     buf.append(")");
 
     return buf.toString();
